@@ -14,7 +14,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://hotel-five-lake.vercel.app', 'http://localhost:3000'], // Allow frontend URL and local dev
+  credentials: true
+}));
 app.use(express.json());
 
 // MongoDB Connection
