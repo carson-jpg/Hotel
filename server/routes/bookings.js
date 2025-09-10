@@ -8,15 +8,29 @@ const router = express.Router();
 // Create a new booking
 router.post('/', async (req, res) => {
   try {
+    console.log('Booking request received:', req.body);
     const bookingData = req.body;
-    
+
+    // Validate required fields
+    const requiredFields = ['roomId', 'guestName', 'guestEmail', 'guestPhone', 'checkInDate', 'checkOutDate', 'guests', 'totalPrice'];
+    const missingFields = requiredFields.filter(field => !bookingData[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+        missingFields
+      });
+    }
+
     // Create new booking
     const booking = new Booking(bookingData);
     await booking.save();
+    console.log('Booking saved successfully:', booking._id);
 
     // Send confirmation email (optional)
     try {
       await sendBookingConfirmation(booking);
+      console.log('Confirmation email sent successfully');
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Don't fail the booking if email fails
@@ -29,7 +43,11 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Booking creation error:', error);
-    res.status(500).json({ message: 'Failed to create booking' });
+    console.error('Error details:', error.message);
+    res.status(500).json({
+      message: 'Failed to create booking',
+      error: error.message
+    });
   }
 });
 
