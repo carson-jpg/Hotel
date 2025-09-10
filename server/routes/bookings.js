@@ -22,8 +22,14 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Handle guest bookings - remove invalid userId
+    const cleanBookingData = { ...bookingData };
+    if (cleanBookingData.userId === 'guest-user' || !cleanBookingData.userId) {
+      delete cleanBookingData.userId; // Remove userId for guest bookings
+    }
+
     // Create new booking
-    const booking = new Booking(bookingData);
+    const booking = new Booking(cleanBookingData);
     await booking.save();
     console.log('Booking saved successfully:', booking._id);
 
